@@ -88,19 +88,19 @@ class calendar(object):
 		"""
 		put a shift on a google calendar.
 		"""
-		text ='%s - %s' % (shift.region, shift.observer)
+		text ='%s - %s' % (shift.region, shift.observer.name)
 
 		event = {
 			'start': {
 				'dateTime': shift.start.isoformat(),
-				'timeZone': shift.start.zone,
+				'timeZone': shift.start.tzinfo.zone,
 		  	},
 			'end': {
-				'dateTime': shift.end.isoformat(),
-				'timeZone': shift.end.zone,
+				'dateTime': shift.stop.isoformat(),
+				'timeZone': shift.stop.tzinfo.zone,
 			},
 			'attendees': [
-				{'email': shift.email},
+				{'email': shift.observer.email},
 			],
 			'reminders': {
 				'useDefault': False,

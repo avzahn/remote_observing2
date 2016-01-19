@@ -10,7 +10,7 @@ utc = pytz.utc
 def datetime_compare(dt0,dt1):
 	attrs=['year','day','hour','minute']
 	for attr in attrs:
-		if getattr(dt0,attr) != getattr(dt1,attr)
+		if getattr(dt0,attr) != getattr(dt1,attr):
 			return False
 	return True
 
@@ -87,7 +87,7 @@ class shift(object):
 
 	def __eq__(self,s):
 		a = datetime_compare(self.start,s.start)
-		b = datetime_compare(self.end, s.end)
+		b = datetime_compare(self.stop, s.stop)
 		return a and b
 
 	def __hash__(self):
@@ -109,6 +109,9 @@ class shift(object):
 
 		return"%s - %s :: %s" % (a,b,self.observer.name)
 
+	def __repr__(self):
+		return self.__str__()
+
 class schedule(object):
 	def __init__(self):
 
@@ -117,8 +120,8 @@ class schedule(object):
 		self.cal = None
 
 	def publish(self):
-		for s in shifts:
-			self.cal.post_shift(shift)
+		for s in self.shifts:
+			self.cal.post_shift(s)
 
 	def __str__(self):
 		out = ""
@@ -130,8 +133,16 @@ class schedule(object):
 
 	def schedule(self):
 
-		observers = copy.copy(self.observers.sort(lambda o: o.karma))
+		observers = sorted(self.observers,key=lambda o: o.karma)
 		shifts = reorder(self.shifts, 5)
+
+		for s in shifts:
+			for o in observers:
+				if o.availability[s]:
+					o.shift = s
+					s.observer = o
+					observers.remove(o)
+					break
 
 
 

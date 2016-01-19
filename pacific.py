@@ -57,7 +57,7 @@ def init_schedule(utc_start):
 			t = times[hh]
 			for s in shifts:
 				if s.match(t):
-					o.karma += shift.karma
+					o.karma += s.karma
 					if abs((t-utc_start).total_seconds()) < 7*24*3600:
 						if is_weekend(utc_start.astimezone(pacific)):
 							for ss in shifts[-6:]:
@@ -65,12 +65,17 @@ def init_schedule(utc_start):
 
 		if o == None:
 			print>>sys.stderr, "%s not found in handoff" % (a_name)
-			continue
+	
+			o = observer(a_name, emails[hh])
+			for i,s in enumerate(shifts):
+				o.availability[s] = av[aa][i]
+
 		observers.append(o)
 
 	sch = schedule()
 	sch.observers = observers
 	sch.shifts = shifts
+	sch.cal = cal
 
 
 	return sch
