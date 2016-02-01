@@ -54,7 +54,7 @@ redirect_uri='urn:ietf:wg:oauth:2.0:oob'
 # Identifying information for the polarbear documents we want
 calendar_id = '14i5g7mue5c6637mo0fdo01l60@group.calendar.google.com'
 availability_name = "Remote_Observing_Availability"
-handoff_name = "handoff_test_copy"
+handoff_name = "Remote Observer Handoff Report (Responses)"
 
 def get_credentials(scope=scope,
 	client_id=client_id,
@@ -148,24 +148,32 @@ def get_last_handoffs(handoff, n=210):
 	return the last n [name,email,handoff time] in the handoff records
 	"""
 	_all = handoff.get_all_values()
+
+	if len(_all) < n:
+		n = len(_all) - 1
+
+
 	h = [ [r[1], handoff_time_str_to_dt(r[5]), r[8] ] for r in _all[-n:] ]
+
 	names = [hh[0] for hh in h]
 	times = [hh[1] for hh in h]
 	emails = [hh[2] for hh in h]
+
 	return names,emails,times
 
 
 def do_google_init():
 	credentials = get_credentials()
 	cal, availability, handoff = get_clients(credentials)
-	h_names, emails, times = get_last_handoffs(handoff)
+	h_names, h_emails, times = get_last_handoffs(handoff)
 	
 	a = availability.get_all_values()[2:] # first two rows have no information
 	a_names = [aa[1] for aa in a]
+	a_emails = [aa[0] for aa in a]
 
 	av = []
 	for row in a:
 		# ignore the existence of "maybe" option for now
 		av.append([ r.lower() == 'yes' for r in row[2:] ])
 
-	return cal, a_names, av, h_names, emails, times
+	return cal, a_names, av, h_names, h_emails, times, a_emails

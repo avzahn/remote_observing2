@@ -3,6 +3,7 @@ import datetime
 import pytz
 import re
 import copy
+import sys
 
 pacific = pytz.timezone("America/Los_Angeles")
 utc = pytz.utc
@@ -38,7 +39,8 @@ def clean(name):
 	and convert to lower case
 	"""
 	s = name.lower()
-	return re.sub('[^a-z]', '', s)
+	out =  re.sub('[^a-z]', '', s)
+	return out
 
 def is_weekend(start):
 	"""
@@ -135,6 +137,9 @@ class schedule(object):
 
 		observers = sorted(self.observers,key=lambda o: o.karma)
 		shifts = reorder(self.shifts, 5)
+
+		for o in observers:
+			print o.name, o.karma 
 
 		for s in shifts:
 			for o in observers:

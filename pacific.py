@@ -37,12 +37,13 @@ def generate_shifts(pacific_start):
 
 def init_schedule(utc_start):
 
-	cal, a_names, av, h_names, emails, times = do_google_init()
+	cal, a_names, av, h_names, h_emails, times, a_emails = do_google_init()
 
 	observers = []
 	shifts = generate_shifts(utc_start.astimezone(pacific))
 
 	for aa,a_name in enumerate(a_names):
+
 		o = None
 		for hh,h_name in enumerate(h_names):
 
@@ -50,7 +51,7 @@ def init_schedule(utc_start):
 				continue
 
 			if o == None:
-				o = observer(a_name, emails[hh])
+				o = observer(a_name, a_emails[aa])
 				for i,s in enumerate(shifts):
 					o.availability[s] = av[aa][i]
 
@@ -59,14 +60,24 @@ def init_schedule(utc_start):
 				if s.match(t):
 					o.karma += s.karma
 					if abs((t-utc_start).total_seconds()) < 7*24*3600:
-						if is_weekend(utc_start.astimezone(pacific)):
+
+						print>>sys.stderr, "previous week: %s, %s" % (a_name,s.karma)
+
+						if is_weekend(t.astimezone(pacific)):
+
+
+							print>>sys.stderr, "WEEKEND INELIGIBLE: %s" % (a_name)
+
 							for ss in shifts[-6:]:
+
+
+
 								o.availability[ss] = False
 
 		if o == None:
 			print>>sys.stderr, "%s not found in handoff" % (a_name)
 	
-			o = observer(a_name, emails[hh])
+			o = observer(a_name, a_emails[aa])
 			for i,s in enumerate(shifts):
 				o.availability[s] = av[aa][i]
 
