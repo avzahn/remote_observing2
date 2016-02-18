@@ -52,7 +52,7 @@ def is_weekend(start):
 		return True
 	if start.weekday() == 4:
 		# Friday nights count as weekends
-		if start.hour > 14:
+		if start.hour >= 12:
 			return True
 
 class observer(object):
