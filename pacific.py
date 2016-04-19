@@ -68,10 +68,7 @@ def init_schedule(utc_start):
 
 							print>>sys.stderr, "WEEKEND INELIGIBLE: %s" % (a_name)
 
-							for ss in shifts[-6:]:
-
-
-
+							for ss in shifts[-8:]:
 								o.availability[ss] = False
 
 		if o == None:

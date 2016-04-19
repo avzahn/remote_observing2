@@ -69,7 +69,7 @@ class shift(object):
 		self.stop = stop
 		self.region = region # name string (ie, "Pacific")
 		self.weekend = is_weekend(start)
-		self.observer = observer(name='UNFILLED', email='polarbear2@googlegroups.com')
+		self.observer = observer(name='UNFILLED', email='avzahn06@gmail.com')
 		self.karma = 10
 
 		if self.weekend == True:
@@ -138,8 +138,6 @@ class schedule(object):
 		observers = sorted(self.observers,key=lambda o: o.karma)
 		shifts = reorder(self.shifts, 5)
 
-		for o in observers:
-			print o.name, o.karma 
 
 		for s in shifts:
 			for o in observers:
@@ -148,6 +146,13 @@ class schedule(object):
 					s.observer = o
 					observers.remove(o)
 					break
+
+		all_emails = ''
+		for o in self.observers:
+			all_emails += o.email
+
+
+
 
 
 
