@@ -5,6 +5,8 @@ import re
 import copy
 import sys
 
+from gmail import *
+
 pacific = pytz.timezone("America/Los_Angeles")
 utc = pytz.utc
 
@@ -62,6 +64,30 @@ class observer(object):
 		self.karma = 0
 		self.shift = None
 		self.availability = {}
+		
+	def dump_availability(self):
+		l = sorted(self.availability.items(),key=lambda x: x[0])
+		out = ''
+		for item in l:
+			out += '%s :: %s\n' % (item[0].time_str(),bool_to_html(item[1]))
+		return out
+		
+	def get_reminder(self, subject):
+		
+		msg = reminder.substitute(
+			availability=indent(self.dump_availability()),
+			sheet_url=sheet_url)
+		
+		msg = MIMEText(msg,'html')
+		msg['Subject'] = subject
+		
+		return msg
+		
+	def send_reminder(self,subject):
+		msg = self.get_reminder(subject)
+		send(msg,self.email)
+			
+
 
 class shift(object):
 	def __init__(self, start, stop, region):
@@ -86,6 +112,9 @@ class shift(object):
 		diff += abs(utc_handoff_time.minute - utc_stop.minute)
 
 		return diff < 120
+		
+	def __lt__(self, s):
+		return self.start < s.start
 
 	def __eq__(self,s):
 		a = datetime_compare(self.start,s.start)
@@ -95,7 +124,8 @@ class shift(object):
 	def __hash__(self):
 		return self.start.day
 
-	def __str__(self):
+
+	def time_str(self):
 		s,e = self.start, self.stop
 		
 		h0, h1 = s.hour, e.hour
@@ -109,10 +139,15 @@ class shift(object):
 			a = s.strftime( "%a %d %I:%M %p")
 			b = e.strftime( "%a %d %I:%M %p %Z")
 
-		return"%s - %s :: %s" % (a,b,self.observer.name)
+		return "%s - %s" % (a,b)
+
+	def __str__(self):
+
+		return"%s :: %s" % (self.time_str(),self.observer.name)
 
 	def __repr__(self):
 		return self.__str__()
+		
 
 class schedule(object):
 	def __init__(self):
@@ -132,6 +167,17 @@ class schedule(object):
 			out += "\n"
 
 		return out
+		
+	def remind_all(self):
+		
+		now = datetime.datetime.now()
+		month = now.month
+		day = now.day
+		
+		subject = "Polarbear remote observing newsletter %s/%s"%(month,day)
+		
+		for obs in self.observers:
+			obs.send_reminder(subject)
 
 	def schedule(self):
 
